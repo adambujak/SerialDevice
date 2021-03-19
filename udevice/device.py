@@ -15,8 +15,16 @@ class SerialDevice:
         while 1:
             readData = self.read_raw_char()
             if readData != '': #empty bytes
-                self.read_callback()
+                self.read_callback(readData)
             time.sleep(self.readSleepTime)
+
+    def write_bytes(self, byteData):
+        self.serialMutex.acquire()
+        self.serialInstance.write(byteData)
+        self.serialMutex.release()
+
+    def write_string(self, string):
+        self.write_bytes(string.encode('ascii'))
 
     def read_line(self):
         self.serialMutex.acquire()
@@ -30,8 +38,9 @@ class SerialDevice:
 
     def read_raw_line(self):
         self.serialMutex.acquire()
-        return self.serialInstance.readline()
+        retval = self.serialInstance.readline()
         self.serialMutex.release()
+        return retval
 
     def read_raw_char(self):
         self.serialMutex.acquire()
